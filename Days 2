@@ -1,0 +1,108 @@
+check_if_jetha_loyal.sh
+#!/bin/bash
+
+<< disclaimer
+This is just for infotainment purpose
+disclaimer
+
+# This is function definition
+
+function is_loyal() {
+read -p "$1 ne mud ke kise dekha: " bandi
+read -p "$1 ka pyaar %" pyaar
+
+if [[ $bandi == "daya bhabhi"  ]];
+then
+	echo "$1 is loyal"
+elif [[ $pyaar -ge 100 ]];
+then
+	echo "$1 is loyal"
+else
+	echo "$1 is not loyal"
+fi
+}
+
+# This is function call
+is_loyal "tom"
+
+create_user.sh
+
+#!/bin/bash
+
+read -p "Enter username: " username
+
+echo "you entered $username"
+
+sudo useradd -m $username
+
+echo "New User added"
+
+for_loop.sh
+
+#!/bin/bash
+
+# This is for and while loops
+
+<< comment
+ 1 is argument 1 which is folder name
+ 2 is start range
+ 3 is end rangeask
+
+comment
+
+for (( num=$2 ; num<=$3; num++ ))
+do
+	mkdir "$1$num"
+done
+
+#!/bin/bash
+
+# This is for and while loops
+
+<< comment
+ 1 is argument 1 which is folder name
+ 2 is start range
+ 3 is end rangeask
+
+comment
+
+for (( num=$2 ; num<=$3; num++ ))
+do
+	mkdir "$1$num"
+done
+
+jetha_lal_ki_duniya.sh
+
+#!/bin/bash
+
+# This is Jetha Lal ki Duniya
+
+<< comment
+Anything 
+written 
+here will not be execute
+comment
+
+name="babitaji"
+
+echo "Name is $name, and date is $(date)"
+
+echo "enter the name:"
+
+read username
+
+echo "You entered $username"
+
+echo "The characters in $0 are:  $1 $2"
+
+while_loop.sh
+
+#!/bin/bash
+
+num=0
+
+while [[ $num -le 10  ]]
+do
+	echo $num
+	num=$((num+2))
+done
