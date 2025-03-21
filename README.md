@@ -57,4 +57,16 @@
 - Moving Beyond Shell: When to Use Python, Ansible, or Terraform  
 - Keeping Up with DevOps Industry Trends  
 
-
+## 7. Projects to Keep Up with the Industry
+- **Automated Log Monitoring & Alert System**
+  - Parses logs, filters errors, and sends alerts via email or Slack.
+- **Infrastructure Backup Automation**
+  - Automates backup of critical files, databases, or VM snapshots.
+- **CI/CD Pipeline Helper**
+  - Automates repository cloning, testing, and deployment tasks.
+- **System Health Check Script**
+  - Checks CPU, Memory, Disk Usage, Running Services, and Network Status.
+- **Kubernetes Resource Monitor**
+  - Automates collection of Kubernetes cluster metrics for monitoring.
+- **AWS Instance Management Script**
+  - Starts/stops AWS EC2 instances on demand or based on schedule.
