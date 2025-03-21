@@ -1,0 +1,186 @@
+vim create_ec2.sh
+
+#!/bin/bash
+set -euo pipefail
+
+check_awscli() {
+    if ! command -v aws &> /dev/null; then
+        echo "AWS CLI is not installed. Please install it first." >&2
+        exit 1
+    fi
+}
+
+install_awscli() {
+    echo "Installing AWS CLI v2 on Linux..."
+
+    # Download and install AWS CLI v2
+    curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    sudo apt-get install -y unzip &> /dev/null
+    unzip -q awscliv2.zip
+    sudo ./aws/install
+
+    # Verify installation
+    aws --version
+
+    # Clean up
+    rm -rf awscliv2.zip ./aws
+}
+
+wait_for_instance() {
+    local instance_id="$1"
+    echo "Waiting for instance $instance_id to be in running state..."
+
+    while true; do
+        state=$(aws ec2 describe-instances --instance-ids "$instance_id" --query 'Reservations[0].Instances[0].State.Name' --output text)
+        if [[ "$state" == "running" ]]; then
+            echo "Instance $instance_id is now running."
+            break
+        fi
+        sleep 10
+    done
+}
+
+create_ec2_instance() {
+    local ami_id="$1"
+    local instance_type="$2"
+    local key_name="$3"
+    local subnet_id="$4"
+    local security_group_ids="$5"
+    local instance_name="$6"
+
+    # Run AWS CLI command to create EC2 instance
+    instance_id=$(aws ec2 run-instances \
+        --image-id "$ami_id" \
+        --instance-type "$instance_type" \
+        --key-name "$key_name" \
+        --subnet-id "$subnet_id" \
+        --security-group-ids "$security_group_ids" \
+        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]" \
+        --query 'Instances[0].InstanceId' \
+        --output text
+    )
+
+    if [[ -z "$instance_id" ]]; then
+        echo "Failed to create EC2 instance." >&2
+        exit 1
+    fi
+
+    echo "Instance $instance_id created successfully."
+
+    # Wait for the instance to be in running state
+    wait_for_instance "$instance_id"
+}
+
+main() {
+    check_awscli || install_awscli
+
+    echo "Creating EC2 instance..."
+
+    # Specify the parameters for creating the EC2 instance
+    AMI_ID=""
+    INSTANCE_TYPE="t2.micro"
+    KEY_NAME=""
+    SUBNET_ID=""
+    SECURITY_GROUP_IDS=""  # Add your security group IDs separated by space
+    INSTANCE_NAME="Shell-Script-EC2-Demo"
+
+    # Call the function to create the EC2 instance
+    create_ec2_instance "$AMI_ID" "$INSTANCE_TYPE" "$KEY_NAME" "$SUBNET_ID" "$SECURITY_GROUP_IDS" "$INSTANCE_NAME"
+
+    echo "EC2 instance creation completed."
+}
+
+main "$@"
+
+vim deploy_django_app.sh
+
+#!/bin/bash
+
+# Deploy a Django app and handle errors
+
+# Function to clone the Django app code
+code_clone() {
+    echo "Cloning the Django app..."
+    if [ -d "django-notes-app" ]; then
+        echo "The code directory already exists. Skipping clone."
+    else
+        git clone https://github.com/LondheShubham153/django-notes-app.git || {
+            echo "Failed to clone the code."
+            return 1
+        }
+    fi
+}
+
+# Function to install required dependencies
+install_requirements() {
+    echo "Installing dependencies..."
+    sudo apt-get update && sudo apt-get install -y docker.io nginx docker-compose || {
+        echo "Failed to install dependencies."
+        return 1
+    }
+}
+
+# Function to perform required restarts
+required_restarts() {
+    echo "Performing required restarts..."
+    sudo chown "$USER" /var/run/docker.sock || {
+        echo "Failed to change ownership of docker.sock."
+        return 1
+    }
+
+    # Uncomment the following lines if needed:
+    # sudo systemctl enable docker
+    # sudo systemctl enable nginx
+    # sudo systemctl restart docker
+}
+
+# Function to deploy the Django app
+deploy() {
+    echo "Building and deploying the Django app..."
+    docker build -t notes-app . && docker-compose up -d || {
+        echo "Failed to build and deploy the app."
+        return 1
+    }
+}
+
+# Main deployment script
+echo "********** DEPLOYMENT STARTED *********"
+
+# Clone the code
+if ! code_clone; then
+    cd django-notes-app || exit 1
+fi
+
+# Install dependencies
+if ! install_requirements; then
+    exit 1
+fi
+
+# Perform required restarts
+if ! required_restarts; then
+    exit 1
+fi
+
+# Deploy the app
+if ! deploy; then
+    echo "Deployment failed. Mailing the admin..."
+    # Add your sendmail or notification logic here
+    exit 1
+fi
+
+echo "********** DEPLOYMENT DONE *********"
+
+vim error_handle.sh
+
+#!/bin/bash
+
+create_directory() {
+	mkdir demo
+}
+
+if ! create_directory; then
+	echo "The code is being exited as the directory already exists"
+	exit 1
+fi
+
+echo "this should not work beacuse the code is interrupted"
